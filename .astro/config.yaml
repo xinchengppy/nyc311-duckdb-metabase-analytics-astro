@@ -1,0 +1,5 @@
+project:
+    name: nyc-311-duckdb-metabase-analytics-astro
+
+build:
+  docker_build_context: .

@@ -1,0 +1,14 @@
+services:
+  metabase:
+    build:
+      context: .
+      dockerfile: Dockerfile.metabase
+    container_name: metaduck
+    ports:
+      - "3000:3000"
+    environment:
+      MB_PLUGINS_DIR: /plugins
+      MB_DB_FILE: /metabase-data/metabase.db
+    volumes:
+      - ../include/db/analytics_read.duckdb:/db/analytics_read.duckdb:ro
+    restart: always
