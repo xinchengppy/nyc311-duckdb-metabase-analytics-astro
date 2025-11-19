@@ -97,6 +97,7 @@ WHERE
     AND created_date IS NOT NULL
     AND complaint_type IS NOT NULL
     AND borough IS NOT NULL
+    AND borough != 'Unspecified'
     AND latitude IS NOT NULL
     AND longitude IS NOT NULL
     AND incident_zip IS NOT NULL;

@@ -37,9 +37,11 @@ MODEL_FILES = [
     "dim_complaint_type.sql",
     "fct_requests.sql",
     "complaint_volume.sql",
-    "top_complaint_types.sql",
     "resolution_by_type.sql",
-    "complaint_dashboard.sql"
+    "complaint_dashboard.sql",
+    "complaint_heatmap.sql",
+    "resolution_trends.sql",
+    "top_complaint_types_dynamic.sql"
 ]
 
 

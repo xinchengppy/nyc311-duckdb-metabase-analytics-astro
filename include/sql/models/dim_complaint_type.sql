@@ -1,5 +1,6 @@
 -- Dimension table for complaint types
-CREATE TABLE IF NOT EXISTS models.dim_complaint_type (
+DROP TABLE IF EXISTS models.dim_complaint_type;
+CREATE TABLE models.dim_complaint_type (
     complaint_type VARCHAR,
     descriptor VARCHAR
 );

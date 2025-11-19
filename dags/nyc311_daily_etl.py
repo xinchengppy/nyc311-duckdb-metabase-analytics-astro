@@ -1,6 +1,7 @@
 import os
 from airflow.decorators import dag, task
 from airflow.operators.bash import BashOperator
+from include.scripts.metabase_refresh import refresh_metabase
 from datetime import datetime, timedelta
 import shutil
 
@@ -25,7 +26,7 @@ def nyc311_etl():
 
     @task
     def extract():
-        df = download_nyc311_data(days_back=90)
+        df = download_nyc311_data(days_back=7)
         return len(df)
 
     @task
@@ -60,6 +61,10 @@ def nyc311_etl():
         """,
     )
 
-    extract() >> load() >> read_only_copy() >> restart_metabase
+    @task
+    def metabase_refresh():
+        refresh_metabase()
+        return "Metabase refreshed"
 
+    extract() >> load() >> read_only_copy() >> restart_metabase >> metabase_refresh()
 nyc311_etl_dag = nyc311_etl()
