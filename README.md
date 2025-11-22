@@ -27,7 +27,7 @@ A data analytics pipeline for NYC 311 service requests using Apache Airflow (Ast
 ## Architecture
 
 ```
-NYC Open Data API
+NYC311 Open Data API
        ↓
    Airflow DAG (Astro)
        ↓
@@ -49,8 +49,8 @@ NYC Open Data API
 
 - Docker and Docker Compose (for containerized deployment)
 - Astronomer CLI (`astro`) for Airflow management
-- Python 3.8+ (for local script execution)
-- Git (for version control)
+- Python 3.8+
+- Git
 - At least 4GB RAM and 10GB disk space for data processing
 
 ## Setup
@@ -65,11 +65,6 @@ cd nyc311-duckdb-metabase-analytics-astro
 ### 2. Install Dependencies
 
 Python packages (in `requirements.txt`):
-- `duckdb`: Analytical database
-- `pandas`: Data manipulation
-- `requests`: HTTP requests
-- `python-dotenv`: Environment variables
-
 OS packages in `packages.txt` for Docker.
 
 ### 3. Configure Environment
@@ -137,10 +132,10 @@ This starts the Airflow services on `http://localhost:8080`.
 
 Star schema:
 
-- **Staging**: `staging.nyc_311` (raw API data)
+- **Staging**: `staging.nyc_311` (raw API data with data cleaning, standarlisation and filter)
 - **Facts**: `models.fct_requests` (requests with status/timestamps)
 - **Dimensions**: `models.dim_complaint_type`
-- **Views**: Volume, resolution metrics, heatmaps, trends
+- **Views**: Complaint volume, resolution metrics, complaint heatmaps, trends...
 
 Models in `include/sql/models/`.
 
@@ -156,6 +151,9 @@ Metabase dashboards with filters for Borough, Complaint Types, and Dynamic time 
 - **Complaint Heatmaps**: Time-of-day and day-of-week patterns (DOW = Day of Week)
 - **Resolution Metrics**: Average resolution times by complaint type
 - **Resolution Rates**: Percentage of complaints resolved within target timeframes
+![Complaint Analysis](https://github.com/xinchengppy/nyc311-duckdb-metabase-analytics-astro/blob/main/screenshots/Recording%202025-11-22%20at%2014.41.47.gif)
+
+
 
 
 
