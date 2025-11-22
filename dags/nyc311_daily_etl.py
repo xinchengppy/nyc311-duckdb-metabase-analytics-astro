@@ -26,7 +26,7 @@ def nyc311_etl():
 
     @task
     def extract():
-        df = download_nyc311_data(days_back=7)
+        df = download_nyc311_data(days_back=60)
         return len(df)
 
     @task

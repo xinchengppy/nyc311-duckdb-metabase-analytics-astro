@@ -1,45 +1,180 @@
-Overview
-========
+# NYC 311 DuckDB Metabase Analytics with Airflow (Astro)
 
-Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Project Contents
-================
+A data analytics pipeline for NYC 311 service requests using Apache Airflow (Astro), DuckDB, and Metabase. Automates daily ETL from the [NYC Open Data API](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9) for real-time urban insights.
 
-Your Astro project contains the following files and folders:
+## Table of Contents
 
-- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes one example DAG:
-    - `example_astronauts`: This DAG shows a simple ETL pipeline example that queries the list of astronauts currently in space from the Open Notify API and prints a statement for each astronaut. The DAG uses the TaskFlow API to define tasks in Python, and dynamic task mapping to dynamically print a statement for each astronaut. For more on how this DAG works, see our [Getting started tutorial](https://www.astronomer.io/docs/learn/get-started-with-airflow).
-- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
-- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
-- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
-- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
-- plugins: Add custom or community plugins for your project to this file. It is empty by default.
-- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
+- [Features](#features)
+- [Architecture](#architecture)
+- [Prerequisites](#prerequisites)
+- [Setup](#setup)
+- [Usage](#usage)
+- [Data Model](#data-model)
+- [Visualizations](#visualizations)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
 
-Deploy Your Project Locally
-===========================
+## Features
 
-Start Airflow on your local machine by running 'astro dev start'.
+- **Automated ETL**: Daily data ingestion from NYC Open Data API with error handling.
+- **High-Performance DB**: DuckDB for fast OLAP queries on large datasets.
+- **Interactive Dashboards**: Metabase visualizations for trends, metrics, heatmaps, and filters.
+- **Containerized**: Docker setup for easy deployment.
+- **Modular**: Extensible SQL models and Python scripts.
 
-This command will spin up five Docker containers on your machine, each for a different Airflow component:
+## Architecture
 
-- Postgres: Airflow's Metadata Database
-- Scheduler: The Airflow component responsible for monitoring and triggering tasks
-- DAG Processor: The Airflow component responsible for parsing DAGs
-- API Server: The Airflow component responsible for serving the Airflow UI and API
-- Triggerer: The Airflow component responsible for triggering deferred tasks
+```
+NYC Open Data API
+       ↓
+   Airflow DAG (Astro)
+       ↓
+   Data Ingestion (Python)
+       ↓
+   DuckDB Staging & Models
+       ↓
+   Read-Only DuckDB Copy
+       ↓
+   Metabase Refresh & Dashboards
+```
 
-When all five containers are ready the command will open the browser to the Airflow UI at http://localhost:8080/. You should also be able to access your Postgres Database at 'localhost:5432/postgres' with username 'postgres' and password 'postgres'.
+- **Orchestration**: Astro (Airflow) manages daily ETL DAGs.
+- **Database**: Primary DuckDB for processing; read-only copy for Metabase to avoid locks.
+- **Visualization**: Metabase connects via JDBC to read-only DuckDB.
+- **Data Flow**: API → Staging → Models → Metabase sync.
 
-Note: If you already have either of the above ports allocated, you can either [stop your existing Docker containers or change the port](https://www.astronomer.io/docs/astro/cli/troubleshoot-locally#ports-are-not-available-for-my-local-airflow-webserver).
+## Prerequisites
 
-Deploy Your Project to Astronomer
-=================================
+- Docker and Docker Compose (for containerized deployment)
+- Astronomer CLI (`astro`) for Airflow management
+- Python 3.8+ (for local script execution)
+- Git (for version control)
+- At least 4GB RAM and 10GB disk space for data processing
 
-If you have an Astronomer account, pushing code to a Deployment on Astronomer is simple. For deploying instructions, refer to Astronomer documentation: https://www.astronomer.io/docs/astro/deploy-code/
+## Setup
 
-Contact
-=======
+### 1. Clone the Repository
 
-The Astronomer CLI is maintained with love by the Astronomer team. To report a bug or suggest a change, reach out to our support.
+```bash
+git clone https://github.com/xinchengppy/nyc311-duckdb-metabase-analytics-astro.git
+cd nyc311-duckdb-metabase-analytics-astro
+```
+
+### 2. Install Dependencies
+
+Python packages (in `requirements.txt`):
+- `duckdb`: Analytical database
+- `pandas`: Data manipulation
+- `requests`: HTTP requests
+- `python-dotenv`: Environment variables
+
+OS packages in `packages.txt` for Docker.
+
+### 3. Configure Environment
+
+Create `.env` in `include/` with:
+
+```
+# NYC Open Data App Token (optional)
+NYC_OPEN_DATA_APP_TOKEN=your_token
+
+# Database paths
+DB_DIR=include/db
+DB_FILE=include/db/analytics.duckdb
+
+# Metabase
+METABASE_URL=http://host.docker.internal:3000
+METABASE_USER=your_username
+METABASE_PASSWORD=your_password
+METABASE_DB_ID=ID
+```
+NYC OPEN DATA APP token you can get from: [HERE](https://data.cityofnewyork.us/profile/edit/developer_settings) (optional, for higher rate limits)
+
+We use these Metabase .env variables to automatically refresh Metabase, as defined in `include/scripts/metabase_refresh.py`.
+
+- `METABASE_USER` and `METABASE_PASSWORD` are your email and password when logging into Metabase.
+- `METABASE_DB_ID` is the database ID in Metabase (found in Admin > Databases > your database > URL last number = ID).
+
+### 4. Start Metabase
+
+In a separate terminal, start Metabase:
+
+```bash
+cd metabase
+docker-compose up -d
+```
+
+This launches Metabase on `http://localhost:3000` with the read-only DuckDB database mounted.
+
+### 5. Start Airflow (Astro)
+
+Back in the root project directory:
+
+```bash
+astro dev start
+```
+
+This starts the Airflow services on `http://localhost:8080`.
+
+### 6. Initial Data Load
+
+- In Airflow UI (`http://localhost:8080`), trigger the `nyc311_daily_etl` DAG manually for the first run.
+- By default, this ingests the past 60 days of NYC 311 data. You can modify the `days_back` parameter in `dags/nyc311_daily_etl.py` to change the data range.
+- **Note**: Larger data volumes (e.g., more than 90 days) may take significant time to ingest and process. Monitor the Airflow logs for progress.
+- The DAG will download data, update DuckDB, create a read-only copy, restart Metabase, and refresh its schema.
+- Monitor logs in Airflow UI to ensure successful completion.
+
+## Usage
+
+- **Monitor Pipeline**: Airflow UI for DAG runs and logs.
+- **Explore Data**: Query DuckDB files with CLI or Python.
+- **Dashboards**: Metabase for visualizations.
+- **Customize**: Edit DAGs, models, or scripts.
+
+## Data Model
+
+Star schema:
+
+- **Staging**: `staging.nyc_311` (raw API data)
+- **Facts**: `models.fct_requests` (requests with status/timestamps)
+- **Dimensions**: `models.dim_complaint_type`
+- **Views**: Volume, resolution metrics, heatmaps, trends
+
+Models in `include/sql/models/`.
+
+## Visualizations
+*Dashboards not persisted; recreate in Metabase using SQL models.*
+
+Here are my visualisations: 
+
+Metabase dashboards with filters for Borough, Complaint Types, and Dynamic time ranges:
+
+- **Complaint Volume Trends**: Line charts showing daily complaint counts over time
+- **Top Complaint Types**: Bar charts of most frequent complaint categories
+- **Complaint Heatmaps**: Time-of-day and day-of-week patterns (DOW = Day of Week)
+- **Resolution Metrics**: Average resolution times by complaint type
+- **Resolution Rates**: Percentage of complaints resolved within target timeframes
+
+
+
+## Troubleshooting
+
+- **Astro Start Fails**: Check Docker/port 8080; `docker system prune`.
+- **Metabase Issues**: `cd metabase && docker-compose up -d`; check logs.
+- **DuckDB Locks**: Solved by read-only copy.
+- **Data Errors**: Check API limits/network; monitor Airflow logs.
+- **Memory**: DuckDB efficient, but large data needs more RAM.
+
+**Logs**: Airflow UI, `astro dev logs`, `docker logs`, DuckDB CLI.
+
+See docs: [Astro](https://www.astronomer.io/docs/), [DuckDB](https://duckdb.org/docs/), [Metabase](https://www.metabase.com/docs/).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+Built with [Astro](https://www.astronomer.io/), [DuckDB](https://duckdb.org/), [Metabase](https://www.metabase.com/). Data from [NYC 311 Open Data](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9/about_data).
