@@ -4,6 +4,8 @@
 
 A data analytics pipeline for NYC 311 service requests using Apache Airflow (Astro), DuckDB, and Metabase. Automates daily ETL from the [NYC Open Data API](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9) for real-time urban insights.
 
+
+
 ## Table of Contents
 
 - [Features](#features)
@@ -177,3 +179,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 Built with [Astro](https://www.astronomer.io/), [DuckDB](https://duckdb.org/), [Metabase](https://www.metabase.com/). Data from [NYC 311 Open Data](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9/about_data).
+
+*This project follows the guidance from [DataSkew's Analytics Dashboard project](https://dataskew.io/projects/analytics-dashboard/) with personal modifications and enhancements.*
+
