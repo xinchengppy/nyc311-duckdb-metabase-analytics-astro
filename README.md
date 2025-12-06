@@ -1,4 +1,4 @@
-# NYC 311 DuckDB Metabase Analytics with Airflow (Astro)
+# NYC 311 Analytics with DuckDB Metabase, Airflow (Astro)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
