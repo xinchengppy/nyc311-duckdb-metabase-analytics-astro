@@ -2,9 +2,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A data analytics pipeline for NYC 311 service requests using Apache Airflow (Astro), DuckDB, and Metabase. Automates daily ETL from the [NYC Open Data API](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9) for real-time urban insights.
+A data analytics pipeline for NYC 311 service requests using Apache Airflow (Astro), DuckDB, and Metabase. Automates daily ETL from the [NYC Open Data API](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9) for daily/weekly/monthly urban insights.
 
-
+![NYC 311 Analytics Pipeline](NYC311_Analytics.svg)
 
 ## Table of Contents
 
@@ -33,14 +33,15 @@ NYC311 Open Data API
        ↓
    Airflow DAG (Astro)
        ↓
-   Data Ingestion (Python)
+   Data Ingestion and Transformation (Python)
        ↓
-   DuckDB Staging & Models
+   DuckDB Data Storage (Staging & Models)
        ↓
    Read-Only DuckDB Copy
        ↓
-   Metabase Refresh & Dashboards
+   Metabase Dashboards
 ```
+
 
 - **Orchestration**: Astro (Airflow) manages daily ETL DAGs.
 - **Database**: Primary DuckDB for processing; read-only copy for Metabase to avoid locks.
